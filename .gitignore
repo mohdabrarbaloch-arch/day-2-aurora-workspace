@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.Python
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local state
+.env
+.env.local
+*.db
+*.sqlite3
+storage/
+*.log
+
+# Node (only used if you add a build step later)
+node_modules/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
