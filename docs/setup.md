@@ -54,7 +54,7 @@ This brings up:
 - `db` — Postgres 16, health-checked with `pg_isready`
 - `app` — the API on port 8000, non-root user, health check on `/api/health`
 
-Uploads persist in the `aurora_uploads` volume and the database in `aurora_pgdata`.
+Uploads persist in the `aurora_storage` volume and the database in `aurora_pgdata`.
 
 ## OCR
 
@@ -63,16 +63,26 @@ sudo apt-get install tesseract-ocr        # Debian / Ubuntu
 brew install tesseract                    # macOS
 ```
 
-Verify with `tesseract --version`. If it is absent, `GET /api/health` reports
-`"ocr": "unavailable"` and image uploads still work — they just contribute no text.
+Verify with `tesseract --version`.
+
+OCR is optional: when the binary is missing, `pytesseract` raises at call time and the app
+swallows it, storing an empty string as the image's text. Image uploads still succeed and the
+thumbnail and palette still work — the image simply contributes nothing to search. There is no
+startup error and no health field for it, so if image text is missing and everything else is
+healthy, Tesseract is the first thing to check.
+
+Keep in mind that Aurora does not OCR PDFs. A scanned PDF is flagged `has_text: false` rather
+than run through OCR, because page-level OCR on a large scan is slow and better done offline.
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `SECRET_KEY must be set` at startup | `APP_ENV=production` with no key | Generate one, or run in development |
+| `SECRET_KEY is unset or still the default` at startup | `APP_ENV=production` with no key | Generate one with `openssl rand -hex 32`, or run in development |
 | Uploads return `413` | File over `MAX_UPLOAD_MB` | Raise the limit, or send a smaller file |
-| Uploads return `415` | Content doesn't match an allowed type | Check the magic bytes — renaming `.exe` to `.png` fails by design |
-| Images upload but have no text | Tesseract missing, or image has no text | Install Tesseract |
-| `"database": "error"` from `/api/health` | Bad `DATABASE_URL` | Check the DSN and that Postgres is up |
-| PDF uploads say "no text layer" | Scanned PDF | OCR it first; Aurora does not OCR PDFs |
+| Uploads return `415` | Bytes don't match an allowed type | Check the magic bytes — renaming `.exe` to `.png` fails by design |
+| Uploads return `422` | Parsing failed (empty file, corrupt PDF, password-protected PDF) | The response `detail` names the reason |
+| Images upload but have no text | Tesseract missing, or the image has no legible text | Install Tesseract |
+| `"database": "unavailable"` from `/api/health` | Bad `DATABASE_URL` | Check the DSN and that Postgres is up |
+| Answers always decline | Files have no text, or the query vocabulary doesn't match | See [usage.md](usage.md) — this is usually the right behaviour, not a bug |
+| `429` after a burst | Rate limiter, 60 requests per minute per IP | Respect `Retry-After`, or raise `RATE_LIMIT_REQUESTS` |
