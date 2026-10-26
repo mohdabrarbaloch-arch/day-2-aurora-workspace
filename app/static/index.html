@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0e1a" />
+<title>Aurora — ask across your images and documents</title>
+<meta name="description" content="Upload images and documents, then ask questions across all of them. Every answer cites its source." />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+
+<div class="aurora-glow" aria-hidden="true"></div>
+
+<!-- ===================== AUTH VIEW ===================== -->
+<main id="view-auth" class="view view-auth">
+  <div class="auth-card">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <h1>Aurora</h1>
+    </div>
+    <p class="tagline">Drop in your images and documents. Ask across all of them at once. Every answer tells you where it came from.</p>
+
+    <div class="auth-tabs" role="tablist">
+      <button class="tab is-active" data-tab="login" role="tab" aria-selected="true">Sign in</button>
+      <button class="tab" data-tab="register" role="tab" aria-selected="false">Create account</button>
+    </div>
+
+    <form id="form-auth" class="stack" novalidate>
+      <label class="field">
+        <span>Email</span>
+        <input type="email" id="auth-email" autocomplete="email" required placeholder="you@example.com" />
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" id="auth-password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters" />
+      </label>
+      <label class="field" id="field-name" hidden>
+        <span>What should we call you?</span>
+        <input type="text" id="auth-name" autocomplete="name" maxlength="80" placeholder="Optional" />
+      </label>
+      <p id="auth-error" class="form-error" role="alert" hidden></p>
+      <button type="submit" class="btn btn-primary" id="auth-submit">Sign in</button>
+    </form>
+
+    <p class="micro">No key required. The retrieval engine runs on the server, so it works the moment you sign up.</p>
+  </div>
+</main>
+
+<!-- ===================== APP VIEW ===================== -->
+<div id="view-app" class="view view-app" hidden>
+
+  <header class="topbar">
+    <div class="brand brand-sm">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <strong>Aurora</strong>
+    </div>
+    <div class="topbar-actions">
+      <span id="provider-badge" class="badge" title="Which engine is producing answers">local</span>
+      <button id="btn-logout" class="btn btn-ghost btn-sm">Sign out</button>
+    </div>
+  </header>
+
+  <div class="workspace-shell">
+
+    <!-- Sidebar: workspaces + assets -->
+    <aside class="panel panel-left">
+      <div class="panel-head">
+        <h2>Workspaces</h2>
+        <button id="btn-new-workspace" class="btn btn-icon" aria-label="New workspace" title="New workspace">+</button>
+      </div>
+      <ul id="workspace-list" class="ws-list"></ul>
+
+      <div class="panel-head panel-head-gap">
+        <h2>Sources</h2>
+        <span id="asset-count" class="count">0</span>
+      </div>
+
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Upload files">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 16V4m0 0L7 9m5-5 5 5" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+        </svg>
+        <p><strong>Drop files</strong> or tap to browse</p>
+        <small>Images · PDF · TXT — up to 15 MB</small>
+        <input type="file" id="file-input" multiple accept="image/*,.pdf,.txt,.md,text/plain,application/pdf" hidden />
+      </div>
+
+      <ul id="asset-list" class="asset-list"></ul>
+    </aside>
+
+    <!-- Conversation -->
+    <section class="panel panel-chat">
+      <div class="panel-head">
+        <h2 id="chat-title">Conversation</h2>
+        <span id="grounded-hint" class="hint">Answers cite their sources</span>
+      </div>
+
+      <div id="messages" class="messages" aria-live="polite">
+        <div class="empty-state">
+          <div class="empty-mark" aria-hidden="true"></div>
+          <h3>Ask across everything at once</h3>
+          <p>Upload a screenshot, a PDF and a text file — then ask one question that spans all three.</p>
+        </div>
+      </div>
+
+      <form id="form-ask" class="composer" novalidate>
+        <textarea id="ask-input" rows="1" placeholder="Ask something about your files…" maxlength="2000"></textarea>
+        <button type="submit" id="ask-submit" class="btn btn-primary btn-send" aria-label="Send question">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h13M13 6l6 6-6 6" />
+          </svg>
+        </button>
+      </form>
+    </section>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="/static/app.js" defer></script>
+</body>
+</html>
